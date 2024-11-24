@@ -1,0 +1,48 @@
+services:
+  taskapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: taskapp
+    ports:
+      - '8000:80'
+    volumes:
+      - ./:/app
+      - ./node_modules:/app/node_modules
+      - ./vendor:/app/vendor
+    depends_on:
+      - db
+    networks:
+      - taskapp
+
+  db:
+    image: postgres:17
+    container_name: postgres-db
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tasks_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - taskapp
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    networks:
+      - taskapp
+
+volumes:
+  db_data:
+
+networks:
+  taskapp:
+    driver: bridge
